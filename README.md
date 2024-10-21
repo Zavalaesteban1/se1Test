@@ -1,2 +1,2 @@
 # se1Test
-# This time i wasnt an idiot haha
+# this time I am not an idoit. hahaha

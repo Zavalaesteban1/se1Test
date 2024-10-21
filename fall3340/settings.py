@@ -77,9 +77,9 @@ WSGI_APPLICATION = 'fall3340.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME' : 'databasename',
+        'NAME' : 'First_One',
         'USER' : 'root',
-        'PASSWORD': 'Ilovemilo7890$',
+        'PASSWORD': 'Lucas21!',
         'HOST' : 'localhost',
         'PORT' : '3306',
             }

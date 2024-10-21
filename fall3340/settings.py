@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 
 # Initialize dotenv
+# allows us to us the enviroment varibales
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -15,9 +16,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# Get the secret key from the .env file 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# Get the debug from the .env file 
 DEBUG = os.environ.get('DEBUG') == 'True'
 
 ALLOWED_HOSTS = []
@@ -72,6 +75,7 @@ WSGI_APPLICATION = 'fall3340.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        # get the corresponding information from the .env file
         'NAME': os.environ.get('DATABASE_NAME'),
         'USER': os.environ.get('DATABASE_USER'),
         'PASSWORD': os.environ.get('DATABASE_PASS'),

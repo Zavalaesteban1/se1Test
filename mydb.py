@@ -1,9 +1,24 @@
 import mysql.connector
+import os
+
+from dotenv import load_dotenv
+
+
+
+# Initialize dotenv
+# allows us to us the enviroment varibales
+load_dotenv()
 
 dataBase = mysql.connector.connect(
+<<<<<<< HEAD
 	host = 'localhost',
 	user = 'root',
 	passwd = 'Lucas21!',
+=======
+	host = os.environ.get('DB_HOST'),
+	user = os.environ.get('DATABASE_USER'),
+	passwd = os.environ.get('DATABASE_PASS'),
+>>>>>>> origin/Zbranch
 	)
 
 

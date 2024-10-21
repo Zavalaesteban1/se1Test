@@ -75,18 +75,17 @@ WSGI_APPLICATION = 'fall3340.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-<<<<<<< HEAD
         'NAME' : 'First_One',
         'USER' : 'root',
         'PASSWORD': 'Lucas21!',
         'HOST' : 'localhost',
-=======
+
         # get the corresponding information from the .env file
         'NAME': os.environ.get('DATABASE_NAME'),
         'USER': os.environ.get('DATABASE_USER'),
         'PASSWORD': os.environ.get('DATABASE_PASS'),
         'HOST' : os.environ.get('DB_HOST'),
->>>>>>> origin/Zbranch
+
         'PORT' : '3306',
             }
 }

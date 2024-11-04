@@ -1,2 +1,8 @@
-# se1Test
-# this time I am not an idoit. hahaha
+# Software Engineering Project 1
+# To-do list project
+#
+#
+# Jesus Barreda
+# Esteban Zavala
+# Armando Gonzalez
+# Israel Sanchez

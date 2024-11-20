@@ -1,0 +1,31 @@
+.retro-bevel {
+    box-shadow: 
+      inset -1px -1px #0a0a0a,
+      inset 1px 1px #dfdfdf,
+      inset -2px -2px grey,
+      inset 2px 2px #fff;
+}
+
+.retro-button {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    color: #000;
+    background: #c0c0c0;
+    border: none;
+    box-shadow: 
+      inset -1px -1px #0a0a0a,
+      inset 1px 1px #fff,
+      inset -2px -2px grey,
+      inset 2px 2px #dfdfdf;
+    border-radius: 0;
+    padding: 4px 8px;
+    margin: 2px;
+}
+
+.retro-button:active {
+    box-shadow: 
+      inset -1px -1px #fff,
+      inset 1px 1px #0a0a0a,
+      inset -2px -2px #dfdfdf,
+      inset 2px 2px grey;
+}

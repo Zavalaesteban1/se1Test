@@ -1,0 +1,37 @@
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.blink {
+    animation: blink 1s linear infinite;
+}
+
+body {
+    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.pixelated {
+    image-rendering: pixelated;
+}
+
+.button-90s {
+    background-color: #d1d5db;
+    border-top: 2px solid white;
+    border-left: 2px solid white;
+    border-bottom: 2px solid #1f2937;
+    border-right: 2px solid #1f2937;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
+}
+
+.button-90s:active {
+    background-color: #9ca3af;
+    border-top: 2px solid #1f2937;
+    border-left: 2px solid #1f2937;
+    border-bottom: 2px solid white;
+    border-right: 2px solid white;
+}

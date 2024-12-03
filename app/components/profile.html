@@ -4,53 +4,77 @@
 {% block title %}Profile{% endblock %}
 
 {% block head %}
-    {{ block.super }}
-    <link href="{% static 'css/profile.css' %}" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+{{ block.super }}
+<link href="{% static 'css/profile.css' %}" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
 {% endblock %}
 
 {% block content %}
- <div class="max-w-3xl mx-auto bg-white border-4 border-gray-800 shadow-lg">
-        <header class="bg-blue-600 p-2 text-center border-b-4 border-gray-800">
-            <h1 class="text-3xl font-bold blink text-white">Profile</h1>
-        </header>
+<div class="max-w-3xl mx-auto bg-white border-4 border-gray-800 shadow-lg">
+    <header class="bg-blue-600 p-2 text-center border-b-4 border-gray-800">
+        <h1 class="text-3xl font-bold blink text-white">Profile</h1>
+    </header>
+
+    <div class="p-4">
+        <table class="w-full border-collapse border-2 border-gray-800">
+            <tbody>
+                <tr class="border-b-2 border-gray-800">
+                    <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Name:</td>
+                    <td class="p-2">{{ profile.name }}</td>
+                </tr>
+                <tr class="border-b-2 border-gray-800">
+                    <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Role:</td>
+                    <td class="p-2">{{ profile.role }}</td>
+                </tr>
+                <tr class="border-b-2 border-gray-800">
+                    <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Email:</td>
+                    <td class="p-2">{{ profile.email }}</td>
+                </tr>
+                <tr class="border-b-2 border-gray-800">
+                    <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Last Login:</td>
+                    <td class="p-2">{{ profile.last_login }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="mt-6 text-center w-full">
+            <div class="image-wrapper flex justify-center items-center">
+                <div class="profile-picture-container mx-auto">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture"
+                        class="profile-image border-4 border-gray-800">
+                    {% else %}
+                    <img src="{% static 'images/theworldisyours.jpg' %}" alt="Default Profile Picture"
+                        class="profile-image border-4 border-gray-800">
+                    {% endif %}
+                </div>
+            </div>
         
-        <div class="p-4">
-            <table class="w-full border-collapse border-2 border-gray-800">
-                <tbody>
-                    <tr class="border-b-2 border-gray-800">
-                        <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Name:</td>
-                        <td class="p-2">{{ profile.name }}</td>
-                    </tr>
-                    <tr class="border-b-2 border-gray-800">
-                        <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Role:</td>
-                        <td class="p-2">{{ profile.role }}</td>
-                    </tr>
-                    <tr class="border-b-2 border-gray-800">
-                        <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Email:</td>
-                        <td class="p-2">{{ profile.email }}</td>
-                    </tr>
-                    <tr class="border-b-2 border-gray-800">
-                        <td class="p-2 font-bold bg-gray-300 border-r-2 border-gray-800">Last Login:</td>
-                        <td class="p-2">{{ profile.last_login }}</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div class="mt-6 text-center">
-                <img src="{% static 'images/theworldisyours.jpg' %}"
-                     class="inline-block border-4 border-gray-800">
-            </div>
-            
-            <div class="mt-6 flex justify-center space-x-4">
-                <a href="{% url 'edit_profile' %}" class="button-90s">Edit Profile</a>
-                <a href="{% url 'change_password' %}" class="button-90s">Change Password</a>
-            </div>
+            <form method="POST" enctype="multipart/form-data" class="mt-4 flex flex-col items-center">
+                {% csrf_token %}
+                <div class="upload-controls w-full flex flex-col items-center">
+                    <input type="file" name="profile_picture" id="profile_picture" 
+                        class="button-90s cursor-pointer max-w-sm"
+                        accept="image/*">
+                    <button type="submit" class="button-90s mt-2">Update Profile Picture</button>
+                </div>
+            </form>
         </div>
-        
-        <footer class="bg-gray-300 p-2 text-center text-sm border-t-4 border-gray-800">
-            <marquee>Welcome to the Information Superhighway! 🚗💨</marquee>
-        </footer>
+
+        <div class="mt-6 flex justify-center space-x-4">
+            <a href="{% url 'edit_profile' %}" class="button-90s">Edit Profile</a>
+            <a href="{% url 'change_password' %}" class="button-90s">Change Password</a>
+            <!-- Add Logout Button -->
+            <a href="{% url 'logout' %}" class="button-90s bg-red-500 text-white hover:bg-red-600"
+                onclick="return confirm('Are you sure you want to log out?')">
+                LOG OUT <span class="blink">_</span>
+            </a>
+        </div>
     </div>
+
+    <footer class="bg-gray-300 p-2 text-center text-sm border-t-4 border-gray-800">
+        <marquee>Welcome to the Information Superhighway! 🚗💨</marquee>
+    </footer>
+</div>
 </div>
 {% endblock %}

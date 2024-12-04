@@ -17,7 +17,7 @@ def home(request):
         else:
             messages.error(request, "Login Error")  # Changed to error message
             return redirect('home')
-    return render(request, 'home.html', {})
+    return render(request, 'admin/admin_home.html', {})
 
 def logout_user(request):
     logout(request)
@@ -37,11 +37,11 @@ def register_user(request):
             return redirect('home')
     else:
         form = SignUpForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'authentication/register.html', {'form': form})
 
 @login_required(login_url='home')
 def forms(request):
-    return render(request, 'forms.html')
+    return render(request, 'admin/admin_forms.html')
 
 @login_required(login_url='home')
 def dashboard(request):
@@ -51,7 +51,7 @@ def dashboard(request):
         'completed_assignments': 3,
         'satisfaction': '98%'
     }
-    return render(request, 'dashboard.html', context)
+    return render(request, 'admin/admin_dashboard.html', context)
 
 @login_required(login_url='home')
 def profile_view(request):
@@ -82,7 +82,7 @@ def profile_view(request):
             'profile_picture': profile.profile_picture if profile.profile_picture else None
         }
     }
-    return render(request, 'profile.html', context)
+    return render(request, 'admin/admin_profile.html', context)
 
 @login_required(login_url='home')
 def edit_profile(request):

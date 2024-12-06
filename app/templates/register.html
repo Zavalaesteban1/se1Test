@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="w-full bg-gray-200 p-4 font-mono">
+    <header class="bg-blue-600 text-white p-2 mb-4 border-4 border-white shadow-lg">
+        <h1 class="text-2xl font-bold text-center">REGISTER NEW ACCOUNT</h1>
+    </header>
+
+    <div class="max-w-md mx-auto bg-white p-6 border-2 border-gray-400 shadow-inner">
+        <div class="mb-4 p-3 bg-blue-100 border-2 border-blue-200">
+            <p class="text-sm">
+                <strong>Note:</strong><br>
+                • For Students: Use your school email (@utrgv.edu, @ut.edu, @tamu.edu)<br>
+                • For Administrators: Use any other email domain (@gmail.com, etc.)
+            </p>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="bg-red-100 border-2 border-red-400 p-3 mb-4">
+                <p class="text-red-700">Please correct the following errors:</p>
+                {{ form.errors }}
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                <p class="text-gray-600 text-xs mt-1">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="button-90s w-full">
+                Register Account
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

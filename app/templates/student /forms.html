@@ -1,0 +1,75 @@
+{% extends '../base.html' %}
+
+{% block title %}Student Forms{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-6">Forms & Submissions</h1>
+
+    <!-- Assignment Submission Form -->
+    <div class="bg-white p-6 rounded-lg shadow mb-8">
+        <h2 class="text-xl font-semibold mb-4">Submit Assignment</h2>
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-gray-700 mb-2">Select Assignment</label>
+                <select name="assignment" required
+                        class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+                    <option value="">Choose an assignment...</option>
+                    {% for assignment in pending_assignments %}
+                    <option value="{{ assignment.id }}">{{ assignment.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-2">Upload File</label>
+                <input type="file" name="submission_file" required
+                       class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-2">Comments</label>
+                <textarea name="comments" rows="4"
+                          class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500"></textarea>
+            </div>
+
+            <button type="submit" 
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Submit Assignment
+            </button>
+        </form>
+    </div>
+
+    <!-- Request Form -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Submit Request</h2>
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-gray-700 mb-2">Request Type</label>
+                <select name="request_type" required
+                        class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500">
+                    <option value="">Select request type...</option>
+                    <option value="extension">Extension Request</option>
+                    <option value="regrade">Regrade Request</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-2">Description</label>
+                <textarea name="request_description" rows="4" required
+                          class="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500"></textarea>
+            </div>
+
+            <button type="submit" 
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Submit Request
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

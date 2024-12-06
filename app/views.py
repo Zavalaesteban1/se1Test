@@ -1,67 +1,95 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Profile
+from .forms import SignUpForm
 
 def home(request):
-    return render(request, 'home.html')
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, "Login Successful")
+            return redirect('home')
+        else:
+            messages.error(request, "Login Error")  # Changed to error message
+            return redirect('home')
+    return render(request, 'admin/admin_home.html', {})
 
-def dashboard(request):
-    return render(request, 'dashboard.html')
+def logout_user(request):
+    logout(request)
+    messages.success(request, "Logged out")
+    return redirect('home')
 
+def register_user(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            messages.success(request, "Sign In Successful")
+            return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'authentication/register.html', {'form': form})
+
+@login_required(login_url='home')
 def forms(request):
-    return render(request, 'forms.html')
+    return render(request, 'admin/admin_forms.html')
 
-def profile(request):
-    return render(request, 'profile.html')
-
-
-@login_required
+@login_required(login_url='home')
 def dashboard(request):
     context = {
-        'active_assignments': 10,  # Replace with actual data
-        'pending_tasks': 7,        # Replace with actual data
-        'completed_assignments': 3, # Replace with actual data
-        'satisfaction': '98%'      # Replace with actual data
-    }
-    return render(request, 'dashboard.html', context)
-
-def dashboard(request):
-    context = {
-        'active_assignments': 10,  # You can replace these with actual data from your database
+        'active_assignments': 10,
         'pending_tasks': 7,
         'completed_assignments': 3,
         'satisfaction': '98%'
     }
-    return render(request, 'dashboard.html', context)
+    return render(request, 'admin/admin_dashboard.html', context)
 
-@login_required
+@login_required(login_url='home')
 def profile_view(request):
-    profile = {
-        'name': request.user.get_full_name() or request.user.username,
-        'role': 'Supreme Admin',
-        'email': request.user.email,
-        'last_login': request.user.last_login,
+    # Get or create profile for the user
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST' and request.FILES.get('profile_picture'):
+        try:
+            # Delete old profile picture if it exists
+            if profile.profile_picture:
+                profile.profile_picture.delete()
+            
+            # Update with new profile picture
+            profile.profile_picture = request.FILES['profile_picture']
+            profile.save()
+            
+            messages.success(request, 'Profile picture updated successfully!')
+            return redirect('profile')
+        except Exception as e:
+            messages.error(request, f'Error updating profile picture: {str(e)}')
+    
+    context = {
+        'profile': {
+            'name': request.user.get_full_name() or request.user.username,
+            'role': 'Software Developer(Admin)',  # You might want to store this in the Profile model
+            'email': request.user.email,
+            'last_login': request.user.last_login,
+            'profile_picture': profile.profile_picture if profile.profile_picture else None
+        }
     }
-    return render(request, 'profile.html', {'profile': profile})
+    return render(request, 'admin/admin_profile.html', context)
 
-@login_required
+@login_required(login_url='home')
 def edit_profile(request):
     # Add edit profile logic here
-    pass
+    return render(request, 'edit_profile.html')
 
-@login_required
+@login_required(login_url='home')
 def change_password(request):
     # Add change password logic here
-    pass
-
-def profile_view(request):
-    # Create a dictionary with fake profile data
-    profile_data = {
-        'name': 'Esteban Zavala',
-        'role': 'Software Developer(Admin)',
-        'email': 'zavala.esteban105690@gmail.com',
-        'last_login': '2024-02-20 15:30:00'
-    }
-    
-    # Pass the data to the template
-    return render(request, 'profile.html', {'profile': profile_data})
+    return render(request, 'change_password.html')

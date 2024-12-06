@@ -75,17 +75,17 @@ body {
     justify-content: center;
     align-items: center;
 }
-
+/* these move the acutal picture */
 .profile-picture-container {
-    width: 200px;
-    height: 200px;
+    width: 400px;
+    height: 400px;
     position: relative;
     margin: auto;
 }
 
 .profile-image {
-    width: 200px;
-    height: 200px;
+    width: 400px;
+    height: 400px;
     object-fit: cover;
     border-radius: 50%;
 }

@@ -52,7 +52,7 @@ ROOT_URLCONF = 'fall3340.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'app', 'components')],  # Add this line
+        'DIRS': [os.path.join(BASE_DIR, 'app', 'templates')],  # Add this line
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

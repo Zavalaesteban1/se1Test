@@ -18,7 +18,7 @@ Management System{% endblock %} {% block head %} {{ block.super }}
                 <h2 class="text-lg font-bold">Create New Assignment</h2>
                 <span class="text-2xl">✨</span>
             </div>
-            <form id="createAssignmentForm" method="POST">
+            <form id="createAssignmentForm" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label class="block text-gray-700 mb-1"
@@ -39,6 +39,14 @@ Management System{% endblock %} {% block head %} {{ block.super }}
                         class="w-full p-2 border-2 border-gray-400"
                     ></textarea>
                 </div>
+                <!-- So admin has the option to get the pdf  -->
+                <div class="mb-3">
+                    <label class="block text-gray-700 mb-1">Instructions PDF:</label>
+                    <input type="file" name="instructionsPdf" accept=".pdf" class="w-full p-2 border-2 border-gray-400" />
+                  </div>
+                    <label class="block text-gray-700 mb-1">Instructions PDF:</label>
+                    <input type="file" name="instructionsPdf" accept=".pdf" class="w-full p-2 border-2 border-gray-400" />
+                  </div>
                 <div class="mb-3">
                     <label class="block text-gray-700 mb-1">Due Date:</label>
                     <input

@@ -4,6 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Profile
 from .forms import SignUpForm
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
 
 def home(request):
     if request.method == "POST":
@@ -42,6 +45,50 @@ def register_user(request):
 @login_required(login_url='home')
 def forms(request):
     return render(request, 'admin/admin_forms.html')
+
+
+@login_required(login_url='home')
+def create_assignment(request):
+    if request.method == 'POST':
+        title = request.POST['title']
+        description = request.POST['description']
+        due_date = request.POST['dueDate']
+        assigned_to = request.POST['assignedTo']
+        instructions_pdf = request.FILES.get('instructionsPdf')
+
+        # Save the uploaded PDF file
+        if instructions_pdf:
+            file_name = default_storage.save(instructions_pdf.name, ContentFile(instructions_pdf.read()))
+            file_url = default_storage.url(file_name)
+        # this will change when the data base works 
+
+        ##########################################################
+
+        # Create a dictionary to store the assignment data
+        assignment_data = {
+            'title': title,
+            'description': description,
+            'due_date': due_date,
+            'assigned_to': assigned_to,
+            'instructions_pdf': file_url
+        }
+
+        # Save the assignment data to a file (e.g., JSON or pickle)
+        assignments_dir = os.path.join(settings.BASE_DIR, 'assignments')
+        os.makedirs(assignments_dir, exist_ok=True)
+        assignment_file = os.path.join(assignments_dir, f'{title}.json')
+        with open(assignment_file, 'w') as f:
+            json.dump(assignment_data, f)
+
+
+        ##########################################################
+
+        # Redirect or render a success page
+        return redirect('assignment_list')
+
+    # Render the form template for GET requests
+    return render(request, 'admin/admin_forms.html')
+
 
 @login_required(login_url='home')
 def dashboard(request):

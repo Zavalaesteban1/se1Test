@@ -6,6 +6,7 @@ from .models import Profile
 from .forms import SignUpForm
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.conf import settings
 import os
 
 def home(request):
@@ -55,14 +56,28 @@ def create_assignment(request):
         due_date = request.POST['dueDate']
         assigned_to = request.POST['assignedTo']
         instructions_pdf = request.FILES.get('instructionsPdf')
+        code_zip_file = request.FILES.get('codeZipFile')
+
+
+        ## testing
+        print("Title:", title)
+        print("Description:", description)
+        print("Due Date:", due_date)
+        print("Assigned To:", assigned_to)
+        print("Instructions PDF:", instructions_pdf)
+        print("Code ZIP File:", code_zip_file)
 
         # Save the uploaded PDF file
+        pdf_url = None
         if instructions_pdf:
-            file_name = default_storage.save(instructions_pdf.name, ContentFile(instructions_pdf.read()))
-            file_url = default_storage.url(file_name)
-        # this will change when the data base works 
+            pdf_file_name = default_storage.save(instructions_pdf.name, ContentFile(instructions_pdf.read()))
+            pdf_url = default_storage.url(pdf_file_name)
 
-        ##########################################################
+        # Save the uploaded ZIP file
+        zip_url = None
+        if code_zip_file:
+            zip_file_name = default_storage.save(code_zip_file.name, ContentFile(code_zip_file.read()))
+            zip_url = default_storage.url(zip_file_name)
 
         # Create a dictionary to store the assignment data
         assignment_data = {
@@ -70,24 +85,37 @@ def create_assignment(request):
             'description': description,
             'due_date': due_date,
             'assigned_to': assigned_to,
-            'instructions_pdf': file_url
+            'instructions_pdf': pdf_url,
+            'code_zip_file': zip_url
         }
 
-        # Save the assignment data to a file (e.g., JSON or pickle)
+        # Save the assignment data to a JSON file
         assignments_dir = os.path.join(settings.BASE_DIR, 'assignments')
         os.makedirs(assignments_dir, exist_ok=True)
         assignment_file = os.path.join(assignments_dir, f'{title}.json')
         with open(assignment_file, 'w') as f:
             json.dump(assignment_data, f)
 
-
-        ##########################################################
-
-        # Redirect or render a success page
         return redirect('assignment_list')
 
-    # Render the form template for GET requests
     return render(request, 'admin/admin_forms.html')
+## for testing purposes 
+def assignment_list(request):
+    assignments_dir = os.path.join(settings.BASE_DIR, 'assignments')
+    os.makedirs(assignments_dir, exist_ok=True)  # Create the directory if it doesn't exist
+    
+    assignment_files = os.listdir(assignments_dir)
+
+    assignments = []
+    for file_name in assignment_files:
+        file_path = os.path.join(assignments_dir, file_name)
+        with open(file_path, 'r') as f:
+            assignment_data = json.load(f)
+            assignments.append(assignment_data)
+
+    print("Assignments:", assignments)
+
+    return render(request, 'admin/assignment_list.html', {'assignments': assignments})
 
 
 @login_required(login_url='home')

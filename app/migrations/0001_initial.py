@@ -6,10 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-<<<<<<< HEAD
-=======
-
->>>>>>> Zbranch
     initial = True
 
     dependencies = [
@@ -18,7 +14,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-<<<<<<< HEAD
             name="Profile",
             fields=[
                 (
@@ -38,14 +33,6 @@ class Migration(migrations.Migration):
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-=======
-            name='Profile',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(default='Supreme Admin', max_length=100)),
-                ('profile_picture', models.ImageField(blank=True, null=True, upload_to='profile_pictures/')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
->>>>>>> Zbranch
             ],
         ),
     ]

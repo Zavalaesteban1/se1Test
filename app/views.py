@@ -44,7 +44,7 @@ def register_user(request):
     return render(request, 'authentication/register.html', {'form': form})
 
 @login_required(login_url='home')
-def forms(request):
+def newassignment(request):
     return render(request, 'admin/admin_forms.html')
 
 
@@ -121,10 +121,67 @@ def assignment_list(request):
 @login_required(login_url='home')
 def dashboard(request):
     context = {
-        'active_assignments': 10,
-        'pending_tasks': 7,
-        'completed_assignments': 3,
-        'satisfaction': '98%'
+        'active_assignments': [
+            {
+                'title': 'Assignment 1',
+                'due_date': '2024-03-01',
+                'students': [
+                    {'name': 'Student 1'},
+                    {'name': 'Student 2'},
+                    {'name': 'Student 3'},
+                ]
+            },
+
+            {
+                'title': 'Assignment 2',
+                'due_date': '2024-04-01',
+                'students': [
+                    {'name': 'Student 4'},
+                    {'name': 'Student 4'},
+                    {'name': 'Student 1'},
+                ]
+            },
+            # Add more assignments as needed
+        ],
+      
+        'pending_tasks': [
+            {
+                'title': 'Assignment 1',
+                'notes': [
+                    {'student': 'Student 1', 'message': 'Having trouble with question 3'},
+                    {'student': 'Student 2', 'message': 'Need clarification on part 2'},
+                ]
+            },
+            # Add more tasks as needed
+        ],
+        'completed_assignments': [
+            {
+                'title': 'Assignment 1',
+                'completed_students': [
+                    {'name': 'Student 1'},
+                    {'name': 'Student 2'},
+                ]
+            },
+            # Add more completed assignments as needed
+            {
+                'title': 'Assignment 2',
+                'completed_students': [
+                    {'name': 'Student 3'},
+                    {'name': 'Student 1'},
+                    {'name': 'Student 5'},
+                ]
+            }, 
+        ],
+        'satisfaction_feedback': [
+            {
+                'title': 'Assignment 1',
+                'feedback': [
+                    {'student': 'Student 1', 'message': 'Assignment was challenging but helpful'},
+                    {'student': 'Student 2', 'message': 'Clear instructions, good learning experience'},
+                ]
+            },
+            # Add more feedback as needed
+        ]
     }
     return render(request, 'admin/admin_dashboard.html', context)
 

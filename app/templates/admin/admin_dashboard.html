@@ -15,37 +15,87 @@
     </header>
     
     <div class="grid grid-cols-2 gap-4">
-        <!-- Dashboard Widgets -->
+        <!-- Active Assignments -->
         <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="text-lg font-bold">Active Assignments</h2>
                 <span class="text-2xl">👥</span>
             </div>
-            <div class="text-3xl font-bold text-blue-600">{{ active_assignments }}</div>
+            <div class="overflow-y-auto max-h-60">
+                {% for assignment in active_assignments %}
+                <div class="mb-4 border-b pb-2">
+                    <h3 class="font-bold">{{ assignment.title }} - Due: {{ assignment.due_date }}</h3>
+                    <ul class="ml-4 list-disc">
+                        {% for student in assignment.students %}
+                            <li>{{ student.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
+        <!-- Pending Tasks/Notes -->
         <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="text-lg font-bold">Pending Tasks/Notes</h2>
                 <span class="text-2xl">📋</span>
             </div>
-            <div class="text-3xl font-bold text-blue-600">{{ pending_tasks }}</div>
+            <div class="overflow-y-auto max-h-60">
+                {% for assignment in pending_tasks %}
+                <div class="mb-4 border-b pb-2">
+                    <h3 class="font-bold">{{ assignment.title }}</h3>
+                    {% for note in assignment.notes %}
+                    <div class="ml-4 mt-2">
+                        <p class="text-sm"><strong>{{ note.student }}:</strong> {{ note.message }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
+        <!-- Completed Assignments -->
         <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="text-lg font-bold">Completed Assignments</h2>
                 <span class="text-2xl">✅</span>
             </div>
-            <div class="text-3xl font-bold text-blue-600">{{ completed_assignments }}</div>
+            <div class="overflow-y-auto max-h-60">
+                {% for assignment in completed_assignments %}
+                <div class="mb-4 border-b pb-2">
+                    <h3 class="font-bold">{{ assignment.title }}</h3>
+                    <ul class="ml-4">
+                        {% for student in assignment.completed_students %}
+                            <li class="flex items-center">
+                                {{ student.name }}
+                                <span class="ml-2 text-green-500">✓</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
+        <!-- Satisfaction Feedback -->
         <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
             <div class="flex items-center justify-between mb-2">
-                <h2 class="text-lg font-bold">Satisfaction</h2>
+                <h2 class="text-lg font-bold">Student Feedback</h2>
                 <span class="text-2xl">😊</span>
             </div>
-            <div class="text-3xl font-bold text-blue-600">{{ satisfaction }}</div>
+            <div class="overflow-y-auto max-h-60">
+                {% for assignment in satisfaction_feedback %}
+                <div class="mb-4 border-b pb-2">
+                    <h3 class="font-bold">{{ assignment.title }}</h3>
+                    {% for feedback in assignment.feedback %}
+                    <div class="ml-4 mt-2">
+                        <p class="text-sm"><strong>{{ feedback.student }}:</strong> {{ feedback.message }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     

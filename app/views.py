@@ -34,7 +34,7 @@ def home(request):
         else:
             messages.error(request, "Login Error")  # Changed to error message
             return redirect('home')
-    return render(request, 'admin/admin_home.html', {})
+    return render(request, 'management/admin_home.html', {})
 
 def logout_user(request):
     logout(request)
@@ -70,12 +70,28 @@ def register_user(request):
     return render(request, 'authentication/register.html', {'form': form})
 
 @login_required(login_url='home')
+def admin_home(request):
+    # Simply render the admin home template with the user context
+    context = {
+        'user': request.user,
+    }
+    return render(request, 'management/admin_home.html', context)
+
+@login_required(login_url='home')
 def newassignment(request):
-    return render(request, 'admin/admin_forms.html')
+    return render(request, 'management/admin_forms.html')
 
 
 @login_required(login_url='home')
 def create_assignment(request):
+
+     # Get all users with student profiles and .edu emails
+    students = Profile.objects.filter(
+        user_type='student',
+        user__email__endswith='@utrgv.edu'
+    ).select_related('user')
+
+
     if request.method == 'POST':
         title = request.POST['title']
         description = request.POST['description']
@@ -85,7 +101,6 @@ def create_assignment(request):
         code_zip_file = request.FILES.get('codeZipFile')
 
 
-        # Create new assignment
         assignment = Assignment.objects.create(
             title=title,
             description=description,
@@ -98,12 +113,16 @@ def create_assignment(request):
         messages.success(request, "Assignment created successfully!")
         return redirect('assignment_list')
 
-    return render(request, 'admin/admin_forms.html')
+    context = {
+        'students': students,
+    }
+
+    return render(request, 'management/admin_forms.html', context)
 ## for testing purposes 
 @login_required(login_url='home')
 def assignment_list(request):
     assignments = Assignment.objects.all()
-    return render(request, 'admin/assignment_list.html', {'assignments': assignments})
+    return render(request, 'management/assignment_list.html', {'assignments': assignments})
 
 
 
@@ -172,7 +191,7 @@ def dashboard(request):
             # Add more feedback as needed
         ]
     }
-    return render(request, 'admin/admin_dashboard.html', context)
+    return render(request, 'management/admin_dashboard.html', context)
 
 @login_required(login_url='home')
 def profile_view(request):
@@ -203,7 +222,7 @@ def profile_view(request):
             'profile_picture': profile.profile_picture if profile.profile_picture else None
         }
     }
-    return render(request, 'admin/admin_profile.html', context)
+    return render(request, 'management/admin_profile.html', context)
 
 @login_required(login_url='home')
 
@@ -221,7 +240,10 @@ def change_password(request):
 @login_required
 @student_required
 def student_home(request):
-    return render(request, 'student/student_home.html')
+    context = {
+        'user_type': request.user.profile.user_type
+    }
+    return render(request, 'student/student_home.html', context)
 
 @login_required
 @student_required
@@ -231,9 +253,40 @@ def student_todo(request):
 @login_required
 @student_required
 def student_submission(request):
-    return render(request, 'student/student_submission.html')
+    context = {
+        'user_type': request.user.profile.user_type
+    }
+    return render(request, 'student/student_submission.html', context)
 
 @login_required
 @student_required
 def student_profile(request):
-    return render(request, 'student/student_profile.html')
+    # Get the profile for the logged-in user
+    profile = Profile.objects.get(user=request.user)
+
+    if request.method == 'POST' and request.FILES.get('profile_picture'):
+        try:
+            # Handle profile picture upload
+            if profile.profile_picture:
+                profile.profile_picture.delete()
+            profile.profile_picture = request.FILES['profile_picture']
+            profile.save()
+            messages.success(request, 'Profile picture updated successfully!')
+            return redirect('student_profile')
+        except Exception as e:
+            messages.error(request, f'Error updating profile picture: {str(e)}')
+    
+
+    context = {
+        'user_type': 'student',
+        'profile': {
+            'name': request.user.get_full_name() or request.user.username,
+            'role': profile.role,  # This will show 'Student' based on your Profile model
+            'email': request.user.email,
+            'last_login': request.user.last_login,
+            'profile_picture': profile.profile_picture if profile.profile_picture else None
+        }
+    }
+
+    
+    return render(request, 'student/student_profile.html', context)

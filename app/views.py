@@ -7,6 +7,9 @@ from .forms import SignUpForm
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
+from .decorators import student_required
+from .models import Assignment
+
 import os
 
 def home(request):
@@ -14,9 +17,19 @@ def home(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
+
+
         if user is not None:
             login(request, user)
             messages.success(request, "Login Successful")
+
+
+            # Redirect based on user type
+            if hasattr(user, 'profile'):
+                if user.profile.user_type == 'student':
+                    return redirect('student_home')
+                else:
+                    return redirect('admin_home')
             return redirect('home')
         else:
             messages.error(request, "Login Error")  # Changed to error message
@@ -35,9 +48,22 @@ def register_user(request):
             user = form.save()
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
+            email = form.cleaned_data['email']
+
+
+            # Determine user type based on email domain
+            user_type = 'student' if email.endswith('.edu') else 'admin'
+
+            # Create profile with determined user type
+            Profile.objects.create(
+                user=user,
+                user_type=user_type,
+                role='Student' if user_type == 'student' else 'Admin'
+            )
+
             user = authenticate(username=username, password=password)
             login(request, user)
-            messages.success(request, "Sign In Successful")
+            messages.success(request, "Registration Successful")
             return redirect('home')
     else:
         form = SignUpForm()
@@ -59,63 +85,26 @@ def create_assignment(request):
         code_zip_file = request.FILES.get('codeZipFile')
 
 
-        ## testing
-        print("Title:", title)
-        print("Description:", description)
-        print("Due Date:", due_date)
-        print("Assigned To:", assigned_to)
-        print("Instructions PDF:", instructions_pdf)
-        print("Code ZIP File:", code_zip_file)
+        # Create new assignment
+        assignment = Assignment.objects.create(
+            title=title,
+            description=description,
+            due_date=due_date,
+            assigned_to=assigned_to,
+            instructions_pdf=instructions_pdf,
+            code_zip_file=code_zip_file
+        )
 
-        # Save the uploaded PDF file
-        pdf_url = None
-        if instructions_pdf:
-            pdf_file_name = default_storage.save(instructions_pdf.name, ContentFile(instructions_pdf.read()))
-            pdf_url = default_storage.url(pdf_file_name)
-
-        # Save the uploaded ZIP file
-        zip_url = None
-        if code_zip_file:
-            zip_file_name = default_storage.save(code_zip_file.name, ContentFile(code_zip_file.read()))
-            zip_url = default_storage.url(zip_file_name)
-
-        # Create a dictionary to store the assignment data
-        assignment_data = {
-            'title': title,
-            'description': description,
-            'due_date': due_date,
-            'assigned_to': assigned_to,
-            'instructions_pdf': pdf_url,
-            'code_zip_file': zip_url
-        }
-
-        # Save the assignment data to a JSON file
-        assignments_dir = os.path.join(settings.BASE_DIR, 'assignments')
-        os.makedirs(assignments_dir, exist_ok=True)
-        assignment_file = os.path.join(assignments_dir, f'{title}.json')
-        with open(assignment_file, 'w') as f:
-            json.dump(assignment_data, f)
-
+        messages.success(request, "Assignment created successfully!")
         return redirect('assignment_list')
 
     return render(request, 'admin/admin_forms.html')
 ## for testing purposes 
+@login_required(login_url='home')
 def assignment_list(request):
-    assignments_dir = os.path.join(settings.BASE_DIR, 'assignments')
-    os.makedirs(assignments_dir, exist_ok=True)  # Create the directory if it doesn't exist
-    
-    assignment_files = os.listdir(assignments_dir)
-
-    assignments = []
-    for file_name in assignment_files:
-        file_path = os.path.join(assignments_dir, file_name)
-        with open(file_path, 'r') as f:
-            assignment_data = json.load(f)
-            assignments.append(assignment_data)
-
-    print("Assignments:", assignments)
-
+    assignments = Assignment.objects.all()
     return render(request, 'admin/assignment_list.html', {'assignments': assignments})
+
 
 
 @login_required(login_url='home')
@@ -217,6 +206,7 @@ def profile_view(request):
     return render(request, 'admin/admin_profile.html', context)
 
 @login_required(login_url='home')
+
 def edit_profile(request):
     # Add edit profile logic here
     return render(request, 'edit_profile.html')
@@ -225,3 +215,25 @@ def edit_profile(request):
 def change_password(request):
     # Add change password logic here
     return render(request, 'change_password.html')
+
+
+
+@login_required
+@student_required
+def student_home(request):
+    return render(request, 'student/student_home.html')
+
+@login_required
+@student_required
+def student_todo(request):
+    return render(request, 'student/student_todo.html')
+
+@login_required
+@student_required
+def student_submission(request):
+    return render(request, 'student/student_submission.html')
+
+@login_required
+@student_required
+def student_profile(request):
+    return render(request, 'student/student_profile.html')

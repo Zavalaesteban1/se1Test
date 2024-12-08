@@ -30,7 +30,16 @@ class Assignment(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     due_date = models.DateField()
-    assigned_to = models.CharField(max_length=100)
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments')
     instructions_pdf = models.FileField(upload_to='assignment_pdfs/', null=True, blank=True)
     code_zip_file = models.FileField(upload_to='assignment_zips/', null=True, blank=True) 
+    # Add these fields for better assignment management
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    completed = models.BooleanField(default=False, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.title} - Assigned to: {self.assigned_to.username}"
+
+    class Meta:
+        ordering = ['-created_at']
     

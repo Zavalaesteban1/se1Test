@@ -36,6 +36,7 @@ class Assignment(models.Model):
     # Add these fields for better assignment management
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     completed = models.BooleanField(default=False, null=True, blank=True)
+    class_name = models.CharField(max_length=100, default='Default Class')  # Add this line
 
     def __str__(self):
         return f"{self.title} - Assigned to: {self.assigned_to.username}"

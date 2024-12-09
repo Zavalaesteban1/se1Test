@@ -9,6 +9,8 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from .decorators import student_required
 from .models import Assignment
+from django.contrib.auth.models import User  # Add this import
+from django.utils import timezone
 
 import os
 
@@ -84,40 +86,68 @@ def newassignment(request):
 
 @login_required(login_url='home')
 def create_assignment(request):
-
-     # Get all users with student profiles and .edu emails
     students = Profile.objects.filter(
         user_type='student',
         user__email__endswith='@utrgv.edu'
     ).select_related('user')
 
-
     if request.method == 'POST':
-        title = request.POST['title']
-        description = request.POST['description']
-        due_date = request.POST['dueDate']
-        assigned_to = request.POST['assignedTo']
-        instructions_pdf = request.FILES.get('instructionsPdf')
-        code_zip_file = request.FILES.get('codeZipFile')
+        try:
+            # Debug prints
+            print("Form data received:")
+            print(f"Title: {request.POST.get('title')}")
+            print(f"Assigned To Email: {request.POST.get('assignedTo')}")
+            print(f"Due Date:: {request.POST.get('dueDate')}")
+            print(f"description: {request.POST.get('description')}")
+            
+            title = request.POST['title']
+            description = request.POST['description']
+            due_date = request.POST['dueDate']
+            class_name = request.POST['className']
+            instructions_pdf = request.FILES.get('instructionsPdf')
+            code_zip_file = request.FILES.get('codeZipFile')
 
+            print(f"Pdf: {request.POST.get('instructionsPdf')}")
+            print(f"zip: {request.POST.get('codeZipFile')}")
 
-        assignment = Assignment.objects.create(
-            title=title,
-            description=description,
-            due_date=due_date,
-            assigned_to=assigned_to,
-            instructions_pdf=instructions_pdf,
-            code_zip_file=code_zip_file
-        )
+            # Get the user instance
+            assigned_to = User.objects.get(email=request.POST['assignedTo'])
+            
+            # Debug print
+            print(f"Found user: {assigned_to.email}")
 
-        messages.success(request, "Assignment created successfully!")
-        return redirect('assignment_list')
+            # Create the assignment
+            assignment = Assignment.objects.create(
+                title=title,
+                description=description,
+                due_date=due_date,
+                class_name=class_name,
+                assigned_to=assigned_to,
+                instructions_pdf=instructions_pdf,
+                code_zip_file=code_zip_file,
+                created_at=timezone.now(),
+                completed=False
+            )
+            
+            print(f"Assignment created: {assignment.title}")
+
+            messages.success(request, f"Assignment '{title}' created successfully and assigned to {assigned_to.email}")
+            return redirect('admin_home')
+
+        except User.DoesNotExist:
+            messages.error(request, "Selected student does not exist.")
+            print("User does not exist error")
+        except Exception as e:
+            messages.error(request, f"Error creating assignment: {str(e)}")
+            print(f"Error: {str(e)}")
+        
+        return redirect('create_assignment')
 
     context = {
         'students': students,
     }
-
     return render(request, 'management/admin_forms.html', context)
+ 
 ## for testing purposes 
 @login_required(login_url='home')
 def assignment_list(request):
@@ -248,7 +278,34 @@ def student_home(request):
 @login_required
 @student_required
 def student_todo(request):
-    return render(request, 'student/student_todo.html')
+    print(f"Current user: {request.user.email}")  # Debug print
+    
+    # Get active (not completed) assignments for the current student
+    active_assignments = Assignment.objects.filter(
+        assigned_to=request.user,
+        completed=False
+    ).order_by('due_date')
+    
+    # Debug print
+    print(f"Found assignments: {active_assignments.count()}")
+    for assignment in active_assignments:
+        print(f"Assignment: {assignment.title} - {assignment.class_name}")
+
+    # Get completed assignments count
+    completed_assignments_count = Assignment.objects.filter(
+        assigned_to=request.user,
+        completed=True
+    ).count()
+
+    context = {
+        'active_assignments': active_assignments,
+        'pending_tasks': active_assignments.count(),
+        'completed_assignments': completed_assignments_count,
+        'satisfaction': '100%'
+    }
+    
+    return render(request, 'student/student_todo.html', context)
+
 
 @login_required
 @student_required
@@ -290,3 +347,29 @@ def student_profile(request):
 
     
     return render(request, 'student/student_profile.html', context)
+
+
+# For marking assignments as complete (you might want to add this)
+@login_required
+@student_required
+def mark_assignment_complete(request, assignment_id):
+    try:
+        assignment = Assignment.objects.get(id=assignment_id, assigned_to=request.user)
+        assignment.completed = True
+        assignment.save()
+        messages.success(request, "Assignment marked as complete!")
+    except Assignment.DoesNotExist:
+        messages.error(request, "Assignment not found.")
+    
+    return redirect('student_todo')
+
+# For viewing assignment details (optional)
+@login_required
+@student_required
+def assignment_detail(request, assignment_id):
+    try:
+        assignment = Assignment.objects.get(id=assignment_id, assigned_to=request.user)
+        return render(request, 'student/assignment_detail.html', {'assignment': assignment})
+    except Assignment.DoesNotExist:
+        messages.error(request, "Assignment not found.")
+        return redirect('student_todo')

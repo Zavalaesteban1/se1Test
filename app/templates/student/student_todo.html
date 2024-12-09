@@ -15,15 +15,45 @@
     </header>
     
     <div class="grid grid-cols-2 gap-4">
-        <!-- Dashboard Widgets -->
-        <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
+        <!-- Active Assignments Widget -->
+        <div class="bg-white p-4 border-2 border-gray-400 shadow-inner col-span-2">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="text-lg font-bold">Active Assignments</h2>
                 <span class="text-2xl">👥</span>
             </div>
-            <div class="text-3xl font-bold text-blue-600">{{ active_assignments }}</div>
+            <div class="space-y-4">
+                {% for assignment in active_assignments %}
+                <div class="border-2 border-gray-300 p-4 rounded-lg">
+                    <h3 class="text-xl font-bold">{{ assignment.title }}</h3>
+                    <p class="text-gray-600 mb-2">Class: {{ assignment.class_name }}</p>
+                    <p class="mb-2">{{ assignment.description }}</p>
+                    <p class="text-sm text-gray-600">Due Date: {{ assignment.due_date }}</p>
+                    
+                    <div class="mt-4 space-x-4">
+                        {% if assignment.instructions_pdf %}
+                        <a href="{{ assignment.instructions_pdf.url }}" 
+                           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                           download>
+                            Download Instructions PDF
+                        </a>
+                        {% endif %}
+                        
+                        {% if assignment.code_zip_file %}
+                        <a href="{{ assignment.code_zip_file.url }}" 
+                           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                           download>
+                            Download Code ZIP
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-600">No active assignments</p>
+                {% endfor %}
+            </div>
         </div>
 
+        <!-- Other Dashboard Widgets -->
         <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="text-lg font-bold">Pending Tasks/Notes</h2>

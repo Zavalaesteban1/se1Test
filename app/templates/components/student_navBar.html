@@ -18,30 +18,26 @@
         }
     </style>
 </head>
-<body class="bg-gray-200">
+<body class="bg-gray-200 font-mono">
     {% if user.is_authenticated %}
     <!-- Top Navigation Bar - Only shown when logged in -->
-    <nav class="bg-gray-800 w-full fixed top-0 left-0 h-16 flex justify-center items-center z-50">
+    <nav class="bg-white border-2 border-gray-400 shadow-inner w-full fixed top-0 left-0 h-16 flex justify-center items-center z-50">
         <div class="flex space-x-8">
-            <a href="{% url 'student_home' %}" class="text-white hover:bg-gray-700 p-3 rounded-lg flex items-center group relative">
+            <a href="{% url 'student_home' %}" class="text-blue-600 hover:text-blue-700 flex items-center">
                 <i class="fas fa-home fa-lg"></i>
                 <span class="ml-2">Home</span>
-                <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">Home</span>
             </a>
-            <a href="{% url 'student_todo' %}" class="text-white hover:bg-gray-700 p-3 rounded-lg flex items-center group relative">
+            <a href="{% url 'student_todo' %}" class="text-blue-600 hover:text-blue-700 flex items-center">
                 <i class="fas fa-chart-bar fa-lg"></i>
                 <span class="ml-2">To-do</span>
-                <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">To-do</span>
             </a>
-            <a href="{% url 'submissions' %}" class="text-white hover:bg-gray-700 p-3 rounded-lg flex items-center group relative">
+            <a href="{% url 'submissions' %}" class="text-blue-600 hover:text-blue-700 flex items-center">
                 <i class="fas fa-clipboard-list fa-lg"></i>
                 <span class="ml-2">Submit</span>
-                <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">Submit</span>
             </a>
-            <a href="{% url 'student_profile' %}" class="text-white hover:bg-gray-700 p-3 rounded-lg flex items-center group relative">
+            <a href="{% url 'student_profile' %}" class="text-blue-600 hover:text-blue-700 flex items-center">
                 <i class="fas fa-user-circle fa-lg"></i>
                 <span class="ml-2">Profile</span>
-                <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 whitespace-nowrap">Profile</span>
             </a>
         </div>
     </nav>

@@ -8,7 +8,7 @@ urlpatterns = [
 
 
     # admin paths 
-    path('management/dashboard/', views.dashboard, name='dashboard'),
+    path('management/dashboard/', views.admin_dashboard, name='dashboard'),
     path('management/home/', views.home, name='admin_home'),
     path('management/forms/', views.create_assignment, name='newassignment'),
     path('management/profile/', views.profile_view, name='profile'),

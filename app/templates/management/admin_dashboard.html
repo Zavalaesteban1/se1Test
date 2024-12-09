@@ -24,11 +24,10 @@
             <div class="overflow-y-auto max-h-60">
                 {% for assignment in active_assignments %}
                 <div class="mb-4 border-b pb-2">
-                    <h3 class="font-bold">{{ assignment.title }} - Due: {{ assignment.due_date }}</h3>
+                    <h3 class="font-bold">{{ assignment.class_name }}</h3>
+                    <p class="font-bold">{{ assignment.title }}<br>Due: {{ assignment.due_date }}</p>
                     <ul class="ml-4 list-disc">
-                        {% for student in assignment.students %}
-                            <li>{{ student.name }}</li>
-                        {% endfor %}
+                        <li>{{ assignment.assigned_to.get_full_name }}</li>
                     </ul>
                 </div>
                 {% endfor %}

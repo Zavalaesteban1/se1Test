@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
+from .models import Assignment
 
 class SignUpForm(UserCreationForm):
 	email = forms.EmailField(label="Email",widget=forms.TextInput(attrs={'class':'form-control','placeholder':'somethin@domain.com'}))
@@ -28,3 +29,12 @@ class SignUpForm(UserCreationForm):
 		self.fields['password2'].widget.attrs['placeholder'] = 'Confirm Password'
 		self.fields['password2'].label = ''
 		self.fields['password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'	
+
+
+class AssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Assignment
+        fields = ['title', 'description', 'due_date', 'assigned_to', 'instructions_pdf', 'code_zip_file']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
+        }

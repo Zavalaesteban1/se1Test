@@ -1,0 +1,58 @@
+{% extends '../base.html' %}
+{% block content %}
+<div class="w-full bg-gray-200 p-4 font-mono">
+    <header class="bg-blue-600 text-white p-2 mb-4 border-4 border-white shadow-lg">
+        <h1 class="text-2xl font-bold text-center">TO-DO LIST 2000</h1>
+    </header>
+
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold">Register</h2>
+                <span class="text-2xl">📝</span>
+            </div>
+
+            <form method="POST" action="">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                        <strong>Errors:</strong>
+                        {% for field in form %}
+                            {% if field.errors %}
+                                <ul class="list-disc pl-5">
+                                    {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="block text-gray-700 mb-1">{{ field.label_tag }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="flex justify-between items-center">
+                    <button
+                        type="submit"
+                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                        Register
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="mt-4 text-center text-sm text-gray-600">
+        © TO-DO LIST 2000
+    </footer>
+</div>
+{% endblock %}

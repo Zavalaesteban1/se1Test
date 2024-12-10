@@ -1,0 +1,72 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}Assignment Submission{% endblock %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/forms.css' %}" />
+{% endblock %}
+{% block content %}
+<div class="w-full bg-gray-200 p-4 font-mono pr-16">
+    <header class="bg-blue-600 text-white p-2 mb-4 border-4 border-white shadow-lg">
+        <h1 class="text-2xl font-bold text-center">ASSIGNMENT SUBMISSION PORTAL</h1>
+    </header>
+
+    <div class="grid grid-cols-1 gap-4 max-w-[calc(100vw-6rem)]">
+        <!-- Assignment Submission List -->
+        <div class="bg-white p-4 border-2 border-gray-400 shadow-inner">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-lg font-bold">Submit Your Assignments</h2>
+                <span class="text-2xl">📝</span>
+            </div>
+            
+            {% if assignments %}
+                {% for assignment in assignments %}
+                <div class="mb-4 p-4 border-2 border-gray-300 rounded">
+                    <h3 class="font-bold text-lg mb-2">{{ assignment.title }}</h3>
+                    <p class="text-gray-600 mb-2">Due Date: {{ assignment.due_date }}</p>
+
+                    <!-- Submission Form -->
+                    {% if not assignment.is_submitted %}
+                    <div class="mt-4">
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'submit_assignment' assignment.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="block text-gray-700 mb-1">Submit PDF Report:</label>
+                                <input type="file" 
+                                       name="submission_pdf" 
+                                       accept=".pdf" 
+                                       required
+                                       class="w-full p-2 border-2 border-gray-400">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-gray-700 mb-1">Submit Code ZIP:</label>
+                                <input type="file" 
+                                       name="submission_zip" 
+                                       accept=".zip" 
+                                       required
+                                       class="w-full p-2 border-2 border-gray-400">
+                            </div>
+                            <button type="submit" 
+                                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                                Submit Assignment
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="mt-4 p-2 bg-green-100 text-green-700 rounded">
+                        ✅ Assignment submitted successfully!
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-gray-600 text-center p-4">No assignments available for submission.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="mt-4 text-center text-sm text-gray-600">
+        © TO-DO LIST 2000
+    </footer>
+</div>
+{% endblock %}

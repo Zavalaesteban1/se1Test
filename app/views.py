@@ -4,20 +4,39 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Profile
 from .forms import SignUpForm
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+from .decorators import student_required
+from .models import Assignment
+from django.contrib.auth.models import User  # Add this import
+from django.utils import timezone
+
+import os
 
 def home(request):
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
+
+
         if user is not None:
             login(request, user)
             messages.success(request, "Login Successful")
+
+
+            # Redirect based on user type
+            if hasattr(user, 'profile'):
+                if user.profile.user_type == 'student':
+                    return redirect('student_home')
+                else:
+                    return redirect('admin_home')
             return redirect('home')
         else:
             messages.error(request, "Login Error")  # Changed to error message
             return redirect('home')
-    return render(request, 'admin/admin_home.html', {})
+    return render(request, 'management/admin_home.html', {})
 
 def logout_user(request):
     logout(request)
@@ -31,27 +50,125 @@ def register_user(request):
             user = form.save()
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
+            email = form.cleaned_data['email']
+
+
+            # Determine user type based on email domain
+            user_type = 'student' if email.endswith('.edu') else 'admin'
+
+            # Create profile with determined user type
+            Profile.objects.create(
+                user=user,
+                user_type=user_type,
+                role='Student' if user_type == 'student' else 'Admin'
+            )
+
             user = authenticate(username=username, password=password)
             login(request, user)
-            messages.success(request, "Sign In Successful")
+            messages.success(request, "Registration Successful")
             return redirect('home')
     else:
         form = SignUpForm()
     return render(request, 'authentication/register.html', {'form': form})
 
 @login_required(login_url='home')
-def forms(request):
-    return render(request, 'admin/admin_forms.html')
+def admin_home(request):
+    # Simply render the admin home template with the user context
+    context = {
+        'user': request.user,
+    }
+    return render(request, 'management/admin_home.html', context)
 
 @login_required(login_url='home')
-def dashboard(request):
+def newassignment(request):
+    return render(request, 'management/admin_forms.html')
+
+
+@login_required(login_url='home')
+def create_assignment(request):
+    students = Profile.objects.filter(
+        user_type='student',
+        user__email__endswith='@utrgv.edu'
+    ).select_related('user')
+
+    if request.method == 'POST':
+        try:
+            # Debug prints
+            print("Form data received:")
+            print(f"Title: {request.POST.get('title')}")
+            print(f"Assigned To Email: {request.POST.get('assignedTo')}")
+            print(f"Due Date:: {request.POST.get('dueDate')}")
+            print(f"description: {request.POST.get('description')}")
+            
+            title = request.POST['title']
+            description = request.POST['description']
+            due_date = request.POST['dueDate']
+            class_name = request.POST['className']
+            instructions_pdf = request.FILES.get('instructionsPdf')
+            code_zip_file = request.FILES.get('codeZipFile')
+
+            print(f"Pdf: {request.POST.get('instructionsPdf')}")
+            print(f"zip: {request.POST.get('codeZipFile')}")
+
+            # Get the user instance
+            assigned_to = User.objects.get(email=request.POST['assignedTo'])
+            
+            # Debug print
+            print(f"Found user: {assigned_to.email}")
+
+            # Create the assignment
+            assignment = Assignment.objects.create(
+                title=title,
+                description=description,
+                due_date=due_date,
+                class_name=class_name,
+                assigned_to=assigned_to,
+                instructions_pdf=instructions_pdf,
+                code_zip_file=code_zip_file,
+                created_at=timezone.now(),
+                completed=False
+            )
+            
+            print(f"Assignment created: {assignment.title}")
+
+            messages.success(request, f"Assignment '{title}' created successfully and assigned to {assigned_to.email}")
+            return redirect('admin_home')
+
+        except User.DoesNotExist:
+            messages.error(request, "Selected student does not exist.")
+            print("User does not exist error")
+        except Exception as e:
+            messages.error(request, f"Error creating assignment: {str(e)}")
+            print(f"Error: {str(e)}")
+        
+        return redirect('create_assignment')
+
     context = {
-        'active_assignments': 10,
-        'pending_tasks': 7,
-        'completed_assignments': 3,
-        'satisfaction': '98%'
+        'students': students,
     }
-    return render(request, 'admin/admin_dashboard.html', context)
+    return render(request, 'management/admin_forms.html', context)
+ 
+## for testing purposes 
+@login_required(login_url='home')
+def assignment_list(request):
+    assignments = Assignment.objects.all()
+    return render(request, 'management/assignment_list.html', {'assignments': assignments})
+
+
+
+@login_required(login_url='home')
+def admin_dashboard(request):
+    active_assignments = Assignment.objects.filter(completed=False).select_related('assigned_to__profile')
+    completed_assignments = Assignment.objects.filter(completed=True).select_related('assigned_to__profile')
+    # Format the submitted_at timestamp with timezone
+    for assignment in completed_assignments:
+        assignment.submitted_at_formatted = timezone.localtime(assignment.submitted_at).strftime('%b. %d, %Y, %I:%M %p')
+    context = {
+        'active_assignments': active_assignments,
+        # Other context variables...
+        'completed_assignments': completed_assignments,
+    }
+    return render(request, 'management/admin_dashboard.html', context)
 
 @login_required(login_url='home')
 def profile_view(request):
@@ -82,9 +199,10 @@ def profile_view(request):
             'profile_picture': profile.profile_picture if profile.profile_picture else None
         }
     }
-    return render(request, 'admin/admin_profile.html', context)
+    return render(request, 'management/admin_profile.html', context)
 
 @login_required(login_url='home')
+
 def edit_profile(request):
     # Add edit profile logic here
     return render(request, 'edit_profile.html')
@@ -93,3 +211,147 @@ def edit_profile(request):
 def change_password(request):
     # Add change password logic here
     return render(request, 'change_password.html')
+
+
+
+@login_required
+@student_required
+def student_home(request):
+    context = {
+        'user_type': request.user.profile.user_type
+    }
+    return render(request, 'student/student_home.html', context)
+
+@login_required
+@student_required
+def student_todo(request):
+    print(f"Current user: {request.user.email}")  # Debug print
+    
+    # Get active (not completed) assignments for the current student
+    active_assignments = Assignment.objects.filter(
+        assigned_to=request.user,
+        completed=False
+    ).order_by('due_date')
+    
+    # Debug print
+    print(f"Found assignments: {active_assignments.count()}")
+    for assignment in active_assignments:
+        print(f"Assignment: {assignment.title} - {assignment.class_name}")
+
+    # Get completed assignments count
+    completed_assignments = Assignment.objects.filter(
+        assigned_to=request.user,
+        completed=True
+    )
+
+    # Format the submitted_at timestamp with timezone
+    for assignment in completed_assignments:
+        assignment.submitted_at_formatted = timezone.localtime(assignment.submitted_at).strftime('%b. %d, %Y, %I:%M %p')
+
+    context = {
+        'active_assignments': active_assignments,
+        'pending_tasks': active_assignments.count(),
+        'completed_assignments': completed_assignments,
+        'satisfaction': '100%'
+    }
+    
+    return render(request, 'student/student_todo.html', context)
+
+
+@login_required
+@student_required
+@login_required
+@student_required
+def student_submission(request):
+    assignments = Assignment.objects.filter(assigned_to=request.user, completed=False)
+    
+    context = {
+        'assignments': assignments,
+        'user_type': request.user.profile.user_type
+    }
+    
+    return render(request, 'student/student_submission.html', context)
+
+
+@login_required
+@student_required
+def student_profile(request):
+    # Get the profile for the logged-in user
+    profile = Profile.objects.get(user=request.user)
+
+    if request.method == 'POST' and request.FILES.get('profile_picture'):
+        try:
+            # Handle profile picture upload
+            if profile.profile_picture:
+                profile.profile_picture.delete()
+            profile.profile_picture = request.FILES['profile_picture']
+            profile.save()
+            messages.success(request, 'Profile picture updated successfully!')
+            return redirect('student_profile')
+        except Exception as e:
+            messages.error(request, f'Error updating profile picture: {str(e)}')
+    
+
+    context = {
+        'user_type': 'student',
+        'profile': {
+            'name': request.user.get_full_name() or request.user.username,
+            'role': profile.role,  # This will show 'Student' based on your Profile model
+            'email': request.user.email,
+            'last_login': request.user.last_login,
+            'profile_picture': profile.profile_picture if profile.profile_picture else None
+        }
+    }
+
+    
+    return render(request, 'student/student_profile.html', context)
+
+
+# For marking assignments as complete (you might want to add this)
+@login_required
+@student_required
+def mark_assignment_complete(request, assignment_id):
+    try:
+        assignment = Assignment.objects.get(id=assignment_id, assigned_to=request.user)
+        assignment.completed = True
+        assignment.save()
+        messages.success(request, "Assignment marked as complete!")
+    except Assignment.DoesNotExist:
+        messages.error(request, "Assignment not found.")
+    
+    return redirect('student_todo')
+
+# For viewing assignment details (optional)
+@login_required
+@student_required
+def assignment_detail(request, assignment_id):
+    try:
+        assignment = Assignment.objects.get(id=assignment_id, assigned_to=request.user)
+        return render(request, 'student/assignment_detail.html', {'assignment': assignment})
+    except Assignment.DoesNotExist:
+        messages.error(request, "Assignment not found.")
+        return redirect('student_todo')
+
+
+
+@login_required
+@student_required
+def submit_assignment(request, assignment_id):
+    try:
+        assignment = Assignment.objects.get(id=assignment_id, assigned_to=request.user)
+        if request.method == 'POST':
+            submission_pdf = request.FILES.get('submission_pdf')
+            submission_zip = request.FILES.get('submission_zip')
+            
+            assignment.submitted_pdf = submission_pdf
+            assignment.submitted_zip = submission_zip
+            assignment.submitted_at = timezone.now()
+            assignment.completed = True
+            assignment.save()
+            
+            messages.success(request, 'Assignment submitted successfully!')
+            return redirect('submissions')
+    except Assignment.DoesNotExist:
+        messages.error(request, 'Assignment not found.')
+    
+    return redirect('submissions')

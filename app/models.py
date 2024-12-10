@@ -38,6 +38,11 @@ class Assignment(models.Model):
     completed = models.BooleanField(default=False, null=True, blank=True)
     class_name = models.CharField(max_length=100, default='Default Class')  # Add this line
 
+    ### for when student submits 
+    submitted_pdf = models.FileField(upload_to='submitted_pdfs/', null=True, blank=True)
+    submitted_zip = models.FileField(upload_to='submitted_zips/', null=True, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.title} - Assigned to: {self.assigned_to.username}"
 

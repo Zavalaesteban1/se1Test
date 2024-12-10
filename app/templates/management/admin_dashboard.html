@@ -63,7 +63,7 @@
             <div class="overflow-y-auto max-h-60">
                 {% for assignment in completed_assignments %}
                 <div class="mb-4 border-b pb-2">
-                    <h3 class="font-bold">{{ assignment.title }}</h3>
+                    <h3 class="font-bold">{{ assignment.title }} - {{ assignment.assigned_to}} - {{ assignment.class_name}}</h3>
                     <ul class="ml-4">
                         {% for student in assignment.completed_students %}
                             <li class="flex items-center">

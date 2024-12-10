@@ -159,10 +159,14 @@ def assignment_list(request):
 @login_required(login_url='home')
 def admin_dashboard(request):
     active_assignments = Assignment.objects.filter(completed=False).select_related('assigned_to__profile')
-    
+    completed_assignments = Assignment.objects.filter(completed=True).select_related('assigned_to__profile')
+    # Format the submitted_at timestamp with timezone
+    for assignment in completed_assignments:
+        assignment.submitted_at_formatted = timezone.localtime(assignment.submitted_at).strftime('%b. %d, %Y, %I:%M %p')
     context = {
         'active_assignments': active_assignments,
         # Other context variables...
+        'completed_assignments': completed_assignments,
     }
     return render(request, 'management/admin_dashboard.html', context)
 
@@ -235,15 +239,19 @@ def student_todo(request):
         print(f"Assignment: {assignment.title} - {assignment.class_name}")
 
     # Get completed assignments count
-    completed_assignments_count = Assignment.objects.filter(
+    completed_assignments = Assignment.objects.filter(
         assigned_to=request.user,
         completed=True
-    ).count()
+    )
+
+    # Format the submitted_at timestamp with timezone
+    for assignment in completed_assignments:
+        assignment.submitted_at_formatted = timezone.localtime(assignment.submitted_at).strftime('%b. %d, %Y, %I:%M %p')
 
     context = {
         'active_assignments': active_assignments,
         'pending_tasks': active_assignments.count(),
-        'completed_assignments': completed_assignments_count,
+        'completed_assignments': completed_assignments,
         'satisfaction': '100%'
     }
     
@@ -252,11 +260,18 @@ def student_todo(request):
 
 @login_required
 @student_required
+@login_required
+@student_required
 def student_submission(request):
+    assignments = Assignment.objects.filter(assigned_to=request.user, completed=False)
+    
     context = {
+        'assignments': assignments,
         'user_type': request.user.profile.user_type
     }
+    
     return render(request, 'student/student_submission.html', context)
+
 
 @login_required
 @student_required
@@ -316,3 +331,27 @@ def assignment_detail(request, assignment_id):
     except Assignment.DoesNotExist:
         messages.error(request, "Assignment not found.")
         return redirect('student_todo')
+
+
+
+@login_required
+@student_required
+def submit_assignment(request, assignment_id):
+    try:
+        assignment = Assignment.objects.get(id=assignment_id, assigned_to=request.user)
+        if request.method == 'POST':
+            submission_pdf = request.FILES.get('submission_pdf')
+            submission_zip = request.FILES.get('submission_zip')
+            
+            assignment.submitted_pdf = submission_pdf
+            assignment.submitted_zip = submission_zip
+            assignment.submitted_at = timezone.now()
+            assignment.completed = True
+            assignment.save()
+            
+            messages.success(request, 'Assignment submitted successfully!')
+            return redirect('submissions')
+    except Assignment.DoesNotExist:
+        messages.error(request, 'Assignment not found.')
+    
+    return redirect('submissions')
